@@ -40,6 +40,7 @@ def save_location(file_path, batch_size=1000):
     if frame_count % batch_size != 0:
       raise ValueError("Frame count must be a multiple of batch size")
     batch = []
+    np.save(file_path,[[0,0]]) # Create a file top save locations in
     while True:
         loc = location_queue.get()
         if loc is None:
@@ -62,7 +63,7 @@ frame_count = 5000
 
 # Create and start threads
 find_thread = threading.Thread(target=find_location, args=(template, frame_count))
-save_thread = threading.Thread(target=save_location, args=('location.npy', 100))  # Set batch size to 100
+save_thread = threading.Thread(target=save_location, args=('location_test.npy', 1000))  # Set batch size to 1000
 
 find_thread.start()
 save_thread.start()
