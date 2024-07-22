@@ -37,6 +37,8 @@ def find_location(template, frame_count):
 
 # Function to save location in batches
 def save_location(file_path, batch_size=1000):
+    if frame_count % batch_size != 0:
+      raise ValueError("Frame count must be a multiple of batch size")
     batch = []
     while True:
         loc = location_queue.get()
@@ -59,7 +61,7 @@ frame_count = 5000
 
 # Create and start threads
 find_thread = threading.Thread(target=find_location, args=(template, frame_count))
-save_thread = threading.Thread(target=save_location, args=('location.npy', 100))  # Set batch size to 100
+save_thread = threading.Thread(target=save_location, args=('location.npy', 1000))  # Set batch size to 100
 
 find_thread.start()
 save_thread.start()
