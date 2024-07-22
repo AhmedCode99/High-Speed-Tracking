@@ -35,19 +35,20 @@ def find_location(template, frame_count):
         location_queue.put(min_loc)
     location_queue.put(None)  # Signal to save thread that processing is done
 
-# Function to save location
-def save_location(file_path):
+# Function to save location in batches
+def save_location(file_path, batch_size=1000):
+    batch = []
     while True:
         loc = location_queue.get()
         if loc is None:
             break
-        loc = np.array(loc)
-        try:
+        batch.append(loc)
+        if len(batch) >= batch_size:
+            loc_batch = np.array(batch)
             location_list = np.load(file_path, mmap_mode='r+')
-            location_list = np.concatenate((location_list, [loc]), axis=0)
-        except FileNotFoundError:
-            location_list = np.array([loc])
-        np.save(file_path, location_list)
+            location_list = np.concatenate((location_list, loc_batch), axis=0)
+            np.save(file_path, location_list)
+            batch = []
         location_queue.task_done()
 
 # Load template
@@ -58,7 +59,7 @@ frame_count = 5000
 
 # Create and start threads
 find_thread = threading.Thread(target=find_location, args=(template, frame_count))
-save_thread = threading.Thread(target=save_location, args=('location.npy',))
+save_thread = threading.Thread(target=save_location, args=('location.npy', 100))  # Set batch size to 100
 
 find_thread.start()
 save_thread.start()
