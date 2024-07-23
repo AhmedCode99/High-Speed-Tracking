@@ -99,10 +99,6 @@ def read_locations(file_path):
     Returns:
     numpy.ndarray: A numpy array containing the locations read from the file.
 
-    Example:
-    >>> locations = read_locations('data/locations.npy')
-    >>> print(locations)
-    array([...])
     """
     with open(file_path, 'rb') as f:  # Open File
         fcntl.flock(f, fcntl.LOCK_SH)  # Lock file
