@@ -3,6 +3,7 @@ import numpy as np
 import neoapi
 import threading
 import queue
+import fcntl
 
 # Camera Settings
 camera = neoapi.Cam()  # Create camera object
@@ -38,9 +39,9 @@ def find_location(template, frame_count):
 # Function to save location in batches
 def save_location(file_path, batch_size=1000):
     if frame_count % batch_size != 0:
-      raise ValueError("Frame count must be a multiple of batch size")
+        raise ValueError("Frame count must be a multiple of batch size")
     batch = []
-    np.save(file_path,[[0,0]]) # Create a file top save locations in
+    np.save(file_path, [[0, 0]])  # Create a file top save locations in
     while True:
         loc = location_queue.get()
         if loc is None:
@@ -48,9 +49,13 @@ def save_location(file_path, batch_size=1000):
         batch.append(loc)
         if len(batch) >= batch_size:
             loc_batch = np.array(batch)
-            location_list = np.load(file_path, mmap_mode='r+')
-            location_list = np.concatenate((location_list, loc_batch), axis=0)
-            np.save(file_path, location_list)
+            with open(file_path, 'r+b') as f:
+                fcntl.flock(f, fcntl.LOCK_EX)
+                location_list = np.load(f, mmap_mode='r+')
+                location_list = np.concatenate((location_list, loc_batch), axis=0)
+                f.seek(0)
+                np.save(f, location_list)
+                fcntl.flock(f, fcntl.LOCK_UN)
             batch = []
             print('batch saved')
         location_queue.task_done()
@@ -63,7 +68,7 @@ frame_count = 5000
 
 # Create and start threads
 find_thread = threading.Thread(target=find_location, args=(template, frame_count))
-save_thread = threading.Thread(target=save_location, args=('location_test.npy', 1000))  # Set batch size to 1000
+save_thread = threading.Thread(target=save_location, args=('location_test.npy', 1000))
 
 find_thread.start()
 save_thread.start()
