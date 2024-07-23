@@ -9,7 +9,7 @@ This repository provides a method to track a moving object and access its locati
 ## How to Use the Code
 
 ### Saving the Data
-An example of how to use this code can be found in the main branch of this repository in `how_to_run_code.py`.
+An example of how to use this code can be found in the main branch of this repository in `three_threads.py`.
 
 1. **Connect the Camera:**
    - Connect the camera and adjust the settings to get a good image of the object being tracked.
