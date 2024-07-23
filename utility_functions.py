@@ -5,9 +5,6 @@ import threading
 import queue
 import fcntl
 
-# Initialize queues
-frame_queue = queue.Queue()
-location_queue = queue.Queue()
 
 def load_template(file_path):
     """
@@ -86,3 +83,29 @@ def save_location(file_path, batch_size=1000):
                     fcntl.flock(f, fcntl.LOCK_UN)  # Unlock file
             batch = []
         location_queue.task_done()
+
+def read_locations(file_path):
+    """
+    Reads a numpy array of locations from a specified file.
+
+    This function opens a file in binary read mode, applies a shared lock to ensure 
+    safe reading in a multi-process environment, loads the numpy array from the file 
+    using memory mapping for efficient reading, and then unlocks the file before returning 
+    the array.
+
+    Parameters:
+    file_path (str): The path to the file containing the numpy array of locations.
+
+    Returns:
+    numpy.ndarray: A numpy array containing the locations read from the file.
+
+    Example:
+    >>> locations = read_locations('data/locations.npy')
+    >>> print(locations)
+    array([...])
+    """
+    with open(file_path, 'rb') as f:  # Open File
+        fcntl.flock(f, fcntl.LOCK_SH)  # Lock file
+        location_list = np.load(f, mmap_mode='r')  # Read data in file
+        fcntl.flock(f, fcntl.LOCK_UN)  # Unlock file
+    return location_list
