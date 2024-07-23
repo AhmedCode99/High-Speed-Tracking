@@ -28,11 +28,15 @@ template, h, w = load_template('template.npy')
 
 # Number of frames to process
 frame_count = 1500000
+batch_size = 150000
+
+# File Path for saving locations
+file_path = 'location_test.npy'
 
 # Create and start threads
 capture_thread = threading.Thread(target=capture_frames, args=(frame_count,))
 find_thread = threading.Thread(target=find_location, args=(template, frame_count))
-save_thread = threading.Thread(target=save_location, args=('location_test.npy', 150000))
+save_thread = threading.Thread(target=save_location, args=(file_path, batch_size))
 
 capture_thread.start()
 find_thread.start()
