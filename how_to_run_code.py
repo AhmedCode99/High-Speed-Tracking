@@ -4,7 +4,7 @@ import neoapi
 import threading
 import queue
 import fcntl
-from utility_functions.py import load_template, capture_frames, find_location, save_location
+from utility_functions import load_template, capture_frames, find_location, save_location
 
 # Camera Settings
 camera = neoapi.Cam()  # Create camera object
