@@ -15,7 +15,7 @@ camera.f.OffsetY.value = 231  # Set OffsetY
 camera.f.OffsetX.value = 304  # Set OffsetX
 camera.f.Gain.value = 1  # Set Gain
 camera.f.AcquisitionFrameRateEnable.value = True
-camera.f.AcquisitionFrameRate.value = 5000  # fps
+camera.f.AcquisitionFrameRate.value = 8000  # fps
 print("camera ok")
 
 # Queue to hold locations
