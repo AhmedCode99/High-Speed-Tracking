@@ -51,7 +51,7 @@ To read the data while locations are being collected, use the `read_locations` f
    - The batch size must be a multiple of the number of frames to be collected.
 
 4. **Python Version:**
-   - The Baumer camera used in this project requires Python version 3.10.12.
+   - The Baumer camera used in this project requires Python version 3.10.2.
    
 
 This repository provides a comprehensive solution for real-time object tracking using OpenCV, ensuring efficient and effective tracking through multi-threading.
