@@ -78,20 +78,22 @@ def find_location(template, frame_count):
 
 def save_location(file_path, frame_count, batch_size=1000):
     """
-    Save locations in batches to a file.
+    Save locations in batches to a file using NpyAppendArray.
     
     Args:
         file_path (str): Path to the file where locations will be saved.
         batch_size (int): Number of locations per batch.
     
     Raises:
-        ValueError: If frame_count is not a multiple of batch_size.
+        ValueError: If frame_count is not a multiple of batch size.
     """
     if frame_count % batch_size != 0:
         raise ValueError("Frame count must be a multiple of batch size")
     
     batch = []
     np.save(file_path, [[0, 0]])  # Create a file to save locations in
+
+    npaa = NpyAppendArray(file_path)
     i = 1
     while True:
         loc = location_queue.get()  # Get location from queue
@@ -101,20 +103,16 @@ def save_location(file_path, frame_count, batch_size=1000):
         if len(batch) >= batch_size:
             loc_batch = np.array(batch)
             with open(file_path, 'r+b') as f:
-                fcntl.flock(f, fcntl.LOCK_EX)  # Lock file
-                f.close()  # Close the file handle before loading with mmap_mode
-                location_list = np.load(file_path, mmap_mode='r+')
-                location_list = np.concatenate((location_list, loc_batch), axis=0)
-                with open(file_path, 'wb') as f:
-                    np.save(f, location_list)
-                    fcntl.flock(f, fcntl.LOCK_UN)  # Unlock file
+                fcntl.flock(f, fcntl.LOCK_EX)  # Lock file exclusively
+                npaa.append(loc_batch)  # Append batch to file
+                fcntl.flock(f, fcntl.LOCK_UN)  # Unlock file
             batch = []
             print('Batch {} Saved'.format(i))
-            i = i+1
+            i += 1
             rss_memory = monitor_memory()
-            print('Memory Used = {} MB'.format(rss_memory))
             memory_list.append(rss_memory)
         location_queue.task_done()
+
 
 def read_locations(file_path):
     """
@@ -133,7 +131,7 @@ def read_locations(file_path):
 
     """
     with open(file_path, 'rb') as f:  # Open File
-        fcntl.flock(f, fcntl.LOCK_SH)  # Lock file
+        fcntl.flock(f, fcntl.LOCK_EX)  # Lock file
         location_list = np.load(f, mmap_mode='r')  # Read data in file
         fcntl.flock(f, fcntl.LOCK_UN)  # Unlock file
     return location_list
@@ -143,8 +141,8 @@ def read_locations(file_path):
 template, h, w = load_template('template.npy')
 
 # Number of frames to process
-frame_count = 5000 #1500000
-batch_size = 1000 #150000
+frame_count = 1500000 #1500000
+batch_size = 300000 #150000
 
 # File Path for saving locations
 file_path = 'location_test.npy'
