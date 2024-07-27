@@ -4,6 +4,10 @@ import neoapi
 import threading
 import queue
 import fcntl
+from npy_append_array import NpyAppendArray
+import psutil
+import os
+import time
 
 # Camera Settings
 camera = neoapi.Cam()  # Create camera object
@@ -21,7 +25,13 @@ print("camera ok")
 # Queues to hold frames and locations
 frame_queue = queue.Queue()
 location_queue = queue.Queue()
+memory_list = []
 
+def monitor_memory():
+    pid = os.getpid()
+    process = psutil.Process(pid)
+    mem_info = process.memory_info()
+    return mem_info.rss / (1024*1024)
 
 def load_template(file_path):
     """
@@ -101,6 +111,8 @@ def save_location(file_path, frame_count, batch_size=1000):
             batch = []
             print('Batch {} Saved'.format(i))
             i = i+1
+            rss_memory = monitor_memory()
+            memory_list.append(rss_memory)
         location_queue.task_done()
 
 def read_locations(file_path):
@@ -149,6 +161,9 @@ save_thread.start()
 capture_thread.join()
 find_thread.join()
 save_thread.join()
+
+# Save Memory Usage
+np.save('memory_usage.npy', memory_list)
 
 # Disconnect the camera
 camera.Disconnect()
