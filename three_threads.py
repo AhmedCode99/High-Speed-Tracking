@@ -74,6 +74,8 @@ def find_location(template, frame_count):
         result = cv2.matchTemplate(frame, template, cv2.TM_SQDIFF)  # Perform template matching
         min_val, max_val, min_loc, max_loc = cv2.minMaxLoc(result)  # Find location
         location_queue.put(min_loc)  # Add location to queue
+        frame_queue.task_done()  # Mark frame as processed
+        del frame, result
     location_queue.put(None)  # Signal to the save thread that processing is done
 
 def save_location(file_path, frame_count, batch_size=1000):
@@ -111,6 +113,7 @@ def save_location(file_path, frame_count, batch_size=1000):
             i += 1
             rss_memory = monitor_memory()
             memory_list.append(rss_memory)
+            print('RSS Used = {} MB'.format(rss_memory))
         location_queue.task_done()
 
 
@@ -141,7 +144,7 @@ def read_locations(file_path):
 template, h, w = load_template('template.npy')
 
 # Number of frames to process
-frame_count = 1500000 #1500000
+frame_count = 9000000
 batch_size = 300000 #150000
 
 # File Path for saving locations
