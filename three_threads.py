@@ -112,6 +112,7 @@ def save_location(file_path, frame_count, batch_size=1000):
             print('Batch {} Saved'.format(i))
             i = i+1
             rss_memory = monitor_memory()
+            print('Memory Used = {} MB'.format(rss_memory))
             memory_list.append(rss_memory)
         location_queue.task_done()
 
