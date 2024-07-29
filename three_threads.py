@@ -144,7 +144,7 @@ def read_locations(file_path):
 template, h, w = load_template('template.npy')
 
 # Number of frames to process
-frame_count = 9000000
+frame_count = 30000000
 batch_size = 300000 #150000
 
 # File Path for saving locations
